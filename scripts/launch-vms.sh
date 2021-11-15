@@ -43,7 +43,7 @@ prepare_ec2_instances() {
     ip=($(cat public_ips.txt))
     echo "Client node: ${ip[0]}"
 
-    echo "[+] Unclutter node"
+    echo "[+] Uncluttering node"
     ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.txt"
     ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.sh"
     ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.pem"

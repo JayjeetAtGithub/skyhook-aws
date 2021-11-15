@@ -74,7 +74,7 @@ cmake -DARROW_SKYHOOK=ON \
   -DARROW_WITH_ZSTD=ON \
   ..
 
-make -j${NPROC} install
+sudo make -j${NPROC} install
 
 if [[ "${BUILD_PYTHON_BINDINGS}" == "true" ]]; then
   export WORKDIR=${WORKDIR:-$HOME}
