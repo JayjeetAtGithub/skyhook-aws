@@ -3,19 +3,6 @@ set -e
 
 count=$2
 
-case "$1" in
-    -s|--spawn)
-    spawn_ec2_instances
-    ;;
-    -p|--prepare)
-    prepare_ec2_instances
-    ;;
-    *)
-    echo "Usage: (-s|--spawn) (-sk|--skip)"
-    exit 0
-    ;;
-esac
-
 spawn_ec2_instances() {
     echo "[+] Launching client ec2 instance"
     aws ec2 run-instances \
@@ -56,6 +43,11 @@ prepare_ec2_instances() {
     ip=($(cat public_ips.txt))
     echo "Client node: ${ip[0]}"
 
+    echo "[+] Unclutter node"
+    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.txt"
+    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.sh"
+    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.pem"
+
     echo "[+] Copying PEM file to client instance"
     scp -i "amazon.pem" amazon.pem ubuntu@${ip[0]}:/home/ubuntu 
 
@@ -65,9 +57,23 @@ prepare_ec2_instances() {
 
     echo "[+] Copying scripts to the client instance"
     scp -i "amazon.pem" deploy_ceph.sh ubuntu@${ip[0]}:/home/ubuntu 
+    scp -i "amazon.pem" deploy_skyhook.sh ubuntu@${ip[0]}:/home/ubuntu 
     scp -i "amazon.pem" passwordless.sh ubuntu@${ip[0]}:/home/ubuntu 
     ssh -i "amazon.pem" ubuntu@${ip[0]} "chmod +x *.sh"
 
     printf "\n\n\n"
     echo "ssh -i 'amazon.pem' ubuntu@${ip[0]}"
 }
+
+case "$1" in
+    -s|--spawn)
+    spawn_ec2_instances
+    ;;
+    -p|--prepare)
+    prepare_ec2_instances
+    ;;
+    *)
+    echo "Usage: (-s|--spawn) (-sk|--skip)"
+    exit 0
+    ;;
+esac

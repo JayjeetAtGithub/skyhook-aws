@@ -26,15 +26,15 @@ fi
 
 NODES=$1
 BRANCH=${2:-master}
-DEPLOY_CLS_LIBS=${3:-true}
+DEPLOY_CLS_LIBS=${3:-false}
 BUILD_PYTHON_BINDINGS=${4:-false}
 BUILD_JAVA_BINDINGS=${5:-false}
 NPROC=${6:-4}
 
 IFS=',' read -ra NODE_LIST <<< "$NODES"; unset IFS
 
-apt update 
-apt install -y python3 \
+sudo apt update 
+sudo apt install -y python3 \
                python3-pip \
                python3-venv \
                python3-numpy \
@@ -83,11 +83,11 @@ if [[ "${BUILD_PYTHON_BINDINGS}" == "true" ]]; then
   export PYARROW_WITH_PARQUET=1
   export PYARROW_WITH_RADOS=1
 
-  mkdir -p /root/dist/lib
-  mkdir -p /root/dist/include
+  sudo mkdir -p /root/dist/lib
+  sudo mkdir -p /root/dist/include
 
-  cp -r /usr/local/lib/. /root/dist/lib
-  cp -r /usr/local/include/. /root/dist/include
+  sudo cp -r /usr/local/lib/. /root/dist/lib
+  sudo cp -r /usr/local/include/. /root/dist/include
 
   cd /tmp/arrow/python
   pip3 install -r requirements-build.txt -r requirements-test.txt
@@ -103,7 +103,7 @@ if [[ "${DEPLOY_CLS_LIBS}" == "true" ]]; then
     scp libcls* $node:/usr/lib/rados-classes/
     scp libarrow* $node:/usr/lib/
     scp libparquet* $node:/usr/lib/
-    ssh $node systemctl restart ceph-osd.target
+    ssh $node sudo systemctl restart ceph-osd.target
   done
 fi
 
@@ -119,4 +119,4 @@ if [[ "${BUILD_JAVA_BINDINGS}" == "true" ]]; then
 fi
 
 export LD_LIBRARY_PATH=/usr/local/lib
-cp /usr/local/lib/libparq* /usr/lib/
+sudo cp /usr/local/lib/libparq* /usr/lib/
