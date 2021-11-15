@@ -5,10 +5,13 @@ count=$2
 
 case "$1" in
     -s|--spawn)
-    spawn_ec2_instances()
+    spawn_ec2_instances
+    ;;
+    -sk|--skip)
     ;;
     *)
-    echo "Usage: (-s|--scan)"
+    echo "Usage: (-s|--spawn) (-sk|--skip)"
+    exit 0
     ;;
 esac
 
@@ -63,4 +66,3 @@ scp -i "amazon.pem" passwordless.sh ubuntu@${ip[0]}:/home/ubuntu
 
 printf "\n\n\n"
 echo "ssh -i 'amazon.pem' ubuntu@${ip[0]}"
-
