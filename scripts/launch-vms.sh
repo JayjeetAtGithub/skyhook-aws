@@ -1,55 +1,66 @@
 #!/bin/bash
 set -e
 
-count=$1
+count=$2
 
-echo "[+] Launching Client ec2 instance"
-aws ec2 run-instances \
-    --image-id ami-083654bd07b5da81d \
-    --count 1 \
-    --instance-type i3.2xlarge \
-    --key-name jayjeet \
-    --security-group-ids sg-0bfc68da558cedfc3 \
-    --subnet-id subnet-cf4671ee
+case "$1" in
+    -s|--spawn)
+    spawn_ec2_instances()
+    ;;
+    *)
+    echo "Usage: (-s|--scan)"
+    ;;
+esac
 
-echo "[+] Launching MON ec2 instances"
-aws ec2 run-instances \
-    --image-id ami-083654bd07b5da81d \
-    --count 3 \
-    --instance-type t2.micro \
-    --key-name jayjeet \
-    --security-group-ids sg-0bfc68da558cedfc3 \
-    --subnet-id subnet-cf4671ee
+spawn_ec2_instances() {
+    echo "[+] Launching Client ec2 instance"
+    aws ec2 run-instances \
+        --image-id ami-083654bd07b5da81d \
+        --count 1 \
+        --instance-type i3.2xlarge \
+        --key-name jayjeet \
+        --security-group-ids sg-0bfc68da558cedfc3 \
+        --subnet-id subnet-cf4671ee
 
-echo "[+] Launching $count OSD ec2 instances"
-aws ec2 run-instances \
-    --image-id ami-083654bd07b5da81d \
-    --count $count \
-    --instance-type i3.2xlarge \
-    --key-name jayjeet \
-    --security-group-ids sg-0bfc68da558cedfc3 \
-    --subnet-id subnet-cf4671ee
+    echo "[+] Launching MON ec2 instances"
+    aws ec2 run-instances \
+        --image-id ami-083654bd07b5da81d \
+        --count 3 \
+        --instance-type i3.2xlarge \
+        --key-name jayjeet \
+        --security-group-ids sg-0bfc68da558cedfc3 \
+        --subnet-id subnet-cf4671ee
 
-sleep 60
+    echo "[+] Launching $count OSD ec2 instances"
+    aws ec2 run-instances \
+        --image-id ami-083654bd07b5da81d \
+        --count $count \
+        --instance-type i3.2xlarge \
+        --key-name jayjeet \
+        --security-group-ids sg-0bfc68da558cedfc3 \
+        --subnet-id subnet-cf4671ee
 
-echo "[+] Gathering Public and Private IPs "
-aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp" > public_ips.txt
-aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
+    sleep 60
+
+    echo "[+] Gathering Public and Private IPs "
+    aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp" > public_ips.txt
+    aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
+}
 
 ip=($(cat public_ips.txt))
 echo "Client Node: ${ip[0]}"
 
 echo "[+] Copying PEM file to client instance"
-scp -i "jayjeet.pem" jayjeet.pem ubuntu@${ip[0]}:/home/ubuntu 
+scp -i "amazon.pem" amazon.pem ubuntu@${ip[0]}:/home/ubuntu 
 
 echo "[+] Copying public and private IPs to client instance"
-scp -i "jayjeet.pem" public_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
-scp -i "jayjeet.pem" private_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
+scp -i "amazon.pem" public_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
+scp -i "amazon.pem" private_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
 
 echo "[+] Copying scripts to the client instance"
-scp -i "jayjeet.pem" deploy_ceph.sh ubuntu@${ip[0]}:/home/ubuntu 
-scp -i "jayjeet.pem" passwordless.sh ubuntu@${ip[0]}:/home/ubuntu 
+scp -i "amazon.pem" deploy_ceph.sh ubuntu@${ip[0]}:/home/ubuntu 
+scp -i "amazon.pem" passwordless.sh ubuntu@${ip[0]}:/home/ubuntu 
 
 printf "\n\n\n"
-echo "ssh -i 'jayjeet.pem' ubuntu@${ip[0]}"
+echo "ssh -i 'amazon.pem' ubuntu@${ip[0]}"
 
