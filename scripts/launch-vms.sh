@@ -38,30 +38,47 @@ spawn_ec2_instances() {
     aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
 }
 
+do_ssh() {
+    ssh -i "amazon.pem" ubuntu@$1 $2
+}
+
+do_scp() {
+    scp -i "amazon.pem" $1 ubuntu@$2:$3
+}
+
+setup_passwordless_ssh() {
+    do_ssh $1 "ssh-keygen -t rsa"
+    do_ssh $1 "cat ~/.ssh/id_rsa.pub" > key.pub
+}
+
+authorize_keys() {
+    cat key.pub | do_ssh $1 "cat - >> ~/.ssh/authorized_keys"
+}
+
 prepare_ec2_instances() {
     echo "[+] Preparing ec2 instances"
     ip=($(cat public_ips.txt))
-    echo "Client node: ${ip[0]}"
+    client=${ip[0]}
+
+    setup_passwordless_ssh $client
+    for host in "${ip[@]}"
+    do
+        authorize_keys $host
+    done
 
     echo "[+] Uncluttering node"
-    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.txt"
-    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.sh"
-    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.pem"
-    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.cc"
-
-    echo "[+] Copying PEM file to client instance"
-    scp -i "amazon.pem" amazon.pem ubuntu@${ip[0]}:/home/ubuntu 
+    do_ssh $client "rm -rf *.txt"
+    do_ssh $client "rm -rf *.sh"
+    do_ssh $client "rm -rf *.cc"
 
     echo "[+] Copying public and private IPs to client instance"
-    scp -i "amazon.pem" public_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
-    scp -i "amazon.pem" private_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
+    do_scp public_ips.txt $client /home/ubuntu 
+    do_scp private_ips.txt $client /home/ubuntu 
 
     echo "[+] Copying scripts to the client instance"
-    scp -i "amazon.pem" bench.cc ubuntu@${ip[0]}:/home/ubuntu 
-    scp -i "amazon.pem" deploy_ceph.sh ubuntu@${ip[0]}:/home/ubuntu 
-    scp -i "amazon.pem" deploy_skyhook.sh ubuntu@${ip[0]}:/home/ubuntu 
-    scp -i "amazon.pem" passwordless.sh ubuntu@${ip[0]}:/home/ubuntu 
-    ssh -i "amazon.pem" ubuntu@${ip[0]} "chmod +x *.sh"
+    do_scp bench.cc $client /home/ubuntu 
+    do_scp deploy_ceph.sh $client /home/ubuntu 
+    do_scp deploy_skyhook.sh $client /home/ubuntu 
 
     printf "\n\n\n"
     echo "ssh -i 'amazon.pem' ubuntu@${ip[0]}"
