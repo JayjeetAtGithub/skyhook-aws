@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "skyhook/client/file_skyhook.h"
 
 #include "arrow/compute/exec/expression.h"
@@ -82,17 +84,13 @@ int main() {
         auto fs = GetFileSystemFromUri("file:///mnt/cephfs/nyc", &path);
   std::vector<std::string> columns;
 
-  auto parquet_format = GetParquetFormat();
+  auto parquet_format = GetSkyhookFormat();
   auto dataset = GetDatasetFromPath(fs, parquet_format, path);
   auto scanner =
       GetScannerFromDataset(dataset, columns, arrow::compute::literal(true), true);
-  auto table_parquet = scanner->ToTable().ValueOrDie();
-
-  auto skyhook_format = GetSkyhookFormat();
-  dataset = GetDatasetFromPath(fs, skyhook_format, path);
-  scanner = GetScannerFromDataset(dataset, columns, arrow::compute::literal(true), true);
-  auto table_skyhook_parquet = scanner->ToTable();
-
-  //ASSERT_EQ(table_parquet->Equals(*table_skyhook_parquet), 1);
-  //ASSERT_EQ(table_parquet->num_rows(), table_skyhook_parquet->num_rows());
+  auto reader = scanner->ToRecordBatchReader().ValueOrDie();
+  std::shared_ptr<arrow::RecordBatch> batch;
+  while (reader->ReadNext(&batch).ok()) {
+    std::cout << batch->num_rows() << std::endl;
+  }
 }
