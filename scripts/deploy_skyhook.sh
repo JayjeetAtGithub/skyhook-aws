@@ -100,9 +100,12 @@ fi
 if [[ "${DEPLOY_CLS_LIBS}" == "true" ]]; then
   cd /tmp/arrow/cpp/release/release
   for node in ${NODE_LIST[@]}; do
-    scp libcls* $node:/usr/lib/rados-classes/
-    scp libarrow* $node:/usr/lib/
-    scp libparquet* $node:/usr/lib/
+    scp libcls* $node:/tmp
+    scp libarrow* $node:/tmp
+    scp libparquet* $node:/tmp
+    ssh $node sudo cp /tmp/libcls* /usr/lib/rados-classes
+    ssh $node sudo cp /tmp/libarrow* /usr/lib
+    ssh $node sudo cp /tmp/libparquet* /usr/lib
     ssh $node sudo systemctl restart ceph-osd.target
   done
 fi
