@@ -84,8 +84,8 @@ int main() {
         auto fs = GetFileSystemFromUri("file:///mnt/cephfs/nyc", &path);
   std::vector<std::string> columns;
 
-  auto parquet_format = GetSkyhookFormat();
-  auto dataset = GetDatasetFromPath(fs, parquet_format, path);
+  auto format = GetSkyhookFormat();
+  auto dataset = GetDatasetFromPath(fs, format, path);
   auto scanner =
       GetScannerFromDataset(dataset, columns, arrow::compute::literal(true), true);
   auto reader = scanner->ToRecordBatchReader().ValueOrDie();
