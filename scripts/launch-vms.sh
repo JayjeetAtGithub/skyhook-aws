@@ -47,6 +47,7 @@ prepare_ec2_instances() {
     ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.txt"
     ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.sh"
     ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.pem"
+    ssh -i "amazon.pem" ubuntu@${ip[0]} "rm -rf *.cc"
 
     echo "[+] Copying PEM file to client instance"
     scp -i "amazon.pem" amazon.pem ubuntu@${ip[0]}:/home/ubuntu 
@@ -56,6 +57,7 @@ prepare_ec2_instances() {
     scp -i "amazon.pem" private_ips.txt ubuntu@${ip[0]}:/home/ubuntu 
 
     echo "[+] Copying scripts to the client instance"
+    scp -i "amazon.pem" bench.cc ubuntu@${ip[0]}:/home/ubuntu 
     scp -i "amazon.pem" deploy_ceph.sh ubuntu@${ip[0]}:/home/ubuntu 
     scp -i "amazon.pem" deploy_skyhook.sh ubuntu@${ip[0]}:/home/ubuntu 
     scp -i "amazon.pem" passwordless.sh ubuntu@${ip[0]}:/home/ubuntu 
