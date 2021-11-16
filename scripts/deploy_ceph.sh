@@ -72,7 +72,7 @@ function delete_osds {
     for node in ${OSD_LIST}; do
         ssh $node sudo pkill ceph-osd || true
         # try to zap the block devices.
-        ssh $node ceph-volume lvm zap $BLKDEV --destroy || true
+        ssh $node sudo ceph-volume lvm zap $BLKDEV --destroy || true
         ssh $node sudo rm -rf /etc/ceph/*
     done
 
@@ -191,7 +191,7 @@ ceph osd pool set cephfs_data pg_autoscale_mode off
 # set the pool sizes based on commandline arguments
 ceph osd pool set cephfs_data size $POOL_SIZE
 ceph osd pool set cephfs_metadata size $POOL_SIZE
-ceph osd pool set device_health_metrics size $POOL_SIZE
+ceph osd pool set device_health_metrics size $POOL_SIZE || true
 
 echo "[9] deploying CephFS"
 ceph fs new cephfs cephfs_metadata cephfs_data
