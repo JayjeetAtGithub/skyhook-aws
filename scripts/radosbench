@@ -1,0 +1,7 @@
+rados bench --no-hints -b 64M -t 4 -p cephfs_data 60 write --no-cleanup
+rados bench --no-hints -t 4 -p cephfs_data 60 seq --no-cleanup
+rados bench --no-hints -t 16 -p cephfs_data 60 rand --no-cleanup
+
+./deploy_ceph.sh ip-172-31-21-225,ip-172-31-23-55,ip-172-31-25-44 ip-172-31-21-225,ip-172-31-23-55,ip-172-31-25-44 ip-172-31-21-225 ip-172-31-23-55 /dev/nvme1n1 3
+
+./deploy_skyhook.sh ip-172-31-21-225,ip-172-31-23-55,ip-172-31-25-44 master true
