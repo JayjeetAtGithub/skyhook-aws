@@ -80,10 +80,9 @@ std::shared_ptr<arrow::dataset::Scanner> GetScannerFromDataset(
 
 
 int main() {
-        std::string path;
-        auto fs = GetFileSystemFromUri("file:///mnt/cephfs/nyc", &path);
+  std::string path;
+  auto fs = GetFileSystemFromUri("file:///mnt/cephfs/nyc", &path);
   std::vector<std::string> columns;
-
   auto format = GetSkyhookFormat();
   auto dataset = GetDatasetFromPath(fs, format, path);
   auto scanner =
