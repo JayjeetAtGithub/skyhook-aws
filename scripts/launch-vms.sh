@@ -1,35 +1,21 @@
 #!/bin/bash
 set -e
 
-count=$2
+count=4
+instance_type=i3.2xlarge
+security_group_ids=sg-0bfc68da558cedfc3
+subnet_id=subnet-cf4671ee
+key_name=jayjeet2
 
 spawn_ec2_instances() {
-    echo "[+] Launching client ec2 instance"
-    aws ec2 run-instances \
-        --image-id ami-083654bd07b5da81d \
-        --count 1 \
-        --instance-type i3.2xlarge \
-        --key-name jayjeet \
-        --security-group-ids sg-0bfc68da558cedfc3 \
-        --subnet-id subnet-cf4671ee
-
-    echo "[+] Launching MON ec2 instances"
-    aws ec2 run-instances \
-        --image-id ami-083654bd07b5da81d \
-        --count 3 \
-        --instance-type i3.2xlarge \
-        --key-name jayjeet \
-        --security-group-ids sg-0bfc68da558cedfc3 \
-        --subnet-id subnet-cf4671ee
-
-    echo "[+] Launching $count OSD ec2 instances"
+    echo "[+] Launching $count ec2 instances"
     aws ec2 run-instances \
         --image-id ami-083654bd07b5da81d \
         --count $count \
-        --instance-type i3.2xlarge \
-        --key-name jayjeet \
-        --security-group-ids sg-0bfc68da558cedfc3 \
-        --subnet-id subnet-cf4671ee
+        --instance-type $instance_type	 \
+        --key-name $key_name \
+        --security-group-ids $security_group_ids \
+        --subnet-id $subnet_id
 
     sleep 60
 
@@ -39,11 +25,11 @@ spawn_ec2_instances() {
 }
 
 do_ssh() {
-    ssh -i "amazon.pem" ubuntu@$1 $2
+    ssh -i "${key_name}.pem" ubuntu@$1 $2
 }
 
 do_scp() {
-    scp -i "amazon.pem" $1 ubuntu@$2:$3
+    scp -i "${key_name}.pem" $1 ubuntu@$2:$3
 }
 
 setup_passwordless_ssh() {
@@ -81,18 +67,19 @@ prepare_ec2_instances() {
     do_scp deploy_skyhook.sh $client /home/ubuntu 
 
     printf "\n\n\n"
-    echo "ssh -i 'amazon.pem' ubuntu@${ip[0]}"
+    echo "ssh -i '$key_name.pem' ubuntu@${ip[0]}"
 }
 
 case "$1" in
     -s|--spawn)
     spawn_ec2_instances
+    prepare_ec2_instances
     ;;
     -p|--prepare)
     prepare_ec2_instances
     ;;
     *)
-    echo "Usage: (-s|--spawn) (-sk|--skip)"
+    echo "Usage: (-s|--spawn) (-p|--prepare)"
     exit 0
     ;;
 esac
