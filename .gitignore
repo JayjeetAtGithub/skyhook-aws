@@ -1,5 +1,5 @@
 **/*.txt
-.env
+**/*.env
 *.pem
 cmd
 *.pub
