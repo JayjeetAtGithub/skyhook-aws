@@ -65,6 +65,7 @@ prepare_ec2_instances() {
     do_scp bench.cc $client /home/ubuntu 
     do_scp deploy_ceph.sh $client /home/ubuntu 
     do_scp deploy_skyhook.sh $client /home/ubuntu 
+    do_scp bench.sh $client /home/ubuntu 
 
     printf "\n\n\n"
     echo "ssh -i '$key_name.pem' ubuntu@${ip[0]}"
