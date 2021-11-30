@@ -81,7 +81,7 @@ std::shared_ptr<arrow::dataset::Scanner> GetScannerFromDataset(
 
 int main() {
   std::string path;
-  auto fs = GetFileSystemFromUri("file:///mnt/cephfs/nyc", &path);
+  auto fs = GetFileSystemFromUri("file:///mnt/cephfs/data16", &path);
   std::vector<std::string> columns;
   auto format = GetSkyhookFormat();
   auto dataset = GetDatasetFromPath(fs, format, path);
@@ -89,7 +89,12 @@ int main() {
       GetScannerFromDataset(dataset, columns, arrow::compute::literal(true), true);
   auto reader = scanner->ToRecordBatchReader().ValueOrDie();
   std::shared_ptr<arrow::RecordBatch> batch;
+  int64_t total_rows_read = 0;
   while (reader->ReadNext(&batch).ok()) {
-    std::cout << batch->num_rows() << std::endl;
+    if (!batch) {
+      break;
+    }
+    total_rows_read += batch->num_rows();
+    std::cout << total_rows_read << std::endl;
   }
 }
