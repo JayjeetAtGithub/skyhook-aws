@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include "skyhook/client/file_skyhook.h"
 
@@ -12,6 +13,19 @@
 
 #include "parquet/arrow/reader.h"
 #include "parquet/arrow/writer.h"
+
+class DurationPrinter {
+public:
+    DurationPrinter() : __start(std::chrono::high_resolution_clock::now()) {}
+    ~DurationPrinter() {
+        using namespace std::chrono;
+        high_resolution_clock::time_point end = high_resolution_clock::now();
+        duration<double> dur = duration_cast<duration<double>>(end - __start);
+        std::cout << dur.count() << " seconds" << std::endl;
+    }
+private:
+    std::chrono::high_resolution_clock::time_point __start;
+};
 
 std::shared_ptr<skyhook::SkyhookFileFormat> GetSkyhookFormat() {
   std::string ceph_config_path = "/etc/ceph/ceph.conf";
@@ -78,23 +92,33 @@ std::shared_ptr<arrow::dataset::Scanner> GetScannerFromDataset(
   return scanner;
 }
 
-
-int main() {
+int main(int argc, char *argv[]) {
+  if (argc < 3) {
+    std::cout << "Usage: bench <path> <format>" << std::endl;
+    return 1;
+  }
   std::string path;
-  auto fs = GetFileSystemFromUri("file:///mnt/cephfs/data16", &path);
-  std::vector<std::string> columns;
-  auto format = GetSkyhookFormat();
+  auto fs = GetFileSystemFromUri(argv[1], &path);
+  
+  std::shared_ptr<arrow::dataset::FileFormat> format = GetParquetFormat();
+  if (std::string(argv[2]) == "pq") format = GetParquetFormat();
+  if (std::string(argv[2]) == "sk") format = GetSkyhookFormat();
   auto dataset = GetDatasetFromPath(fs, format, path);
+  
+  std::vector<std::string> columns;
   auto scanner =
       GetScannerFromDataset(dataset, columns, arrow::compute::literal(true), true);
   auto reader = scanner->ToRecordBatchReader().ValueOrDie();
-  std::shared_ptr<arrow::RecordBatch> batch;
-  int64_t total_rows_read = 0;
-  while (reader->ReadNext(&batch).ok()) {
-    if (!batch) {
-      break;
+  {
+    DurationPrinter dp;
+    std::shared_ptr<arrow::RecordBatch> batch;
+    int64_t total_rows_read = 0;
+    while (reader->ReadNext(&batch).ok()) {
+      if (!batch) {
+        break;
+      }
+      total_rows_read += batch->num_rows();
+      std::cout << total_rows_read << std::endl;
     }
-    total_rows_read += batch->num_rows();
-    std::cout << total_rows_read << std::endl;
   }
 }
