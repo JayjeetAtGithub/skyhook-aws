@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-count=4
-instance_type=i3.2xlarge
+count=2
+instance_type=i3.8xlarge	
 security_group_ids=sg-0bfc68da558cedfc3
 subnet_id=subnet-cf4671ee
 key_name=jayjeet2
