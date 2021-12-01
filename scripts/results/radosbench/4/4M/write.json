@@ -1,4 +1,3 @@
-hints = 0
 {
     "concurrent_ios": "32",
     "object_size": "4194304",
