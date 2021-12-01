@@ -15,3 +15,4 @@ if __name__ == "__main__":
     osds_ips = ",".join(hostnames[1:])
 
     print("./deploy_ceph.sh " + mons_ips + " " + osds_ips + " " + mds_ips + " " + mgr_ips + " /dev/nvme0n1 " + "3")
+    
