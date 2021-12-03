@@ -2,15 +2,17 @@
 set -e
 
 count=2
-instance_type=i3.8xlarge	
-security_group_ids=sg-0bfc68da558cedfc3
-subnet_id=subnet-cf4671ee
-key_name=jayjeet2
+ami=ami-0a49b025fffbbdac6
+instance_type=i3.metal
+security_group_ids=sg-0f8c8cb3d7124e05c
+subnet_id=subnet-68491802
+key_name=jayjeet2-frankfurt
+chmod 400 "${key_name}.pem"
 
 spawn_ec2_instances() {
     echo "[+] Launching $count ec2 instances"
     aws ec2 run-instances \
-        --image-id ami-083654bd07b5da81d \
+        --image-id $ami \
         --count $count \
         --instance-type $instance_type	 \
         --key-name $key_name \
