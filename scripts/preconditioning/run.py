@@ -18,7 +18,7 @@ if __name__ == "__main__":
     device = sys.argv[1]
     with open('template.fio', 'r') as f:
         template = f.read()
-        template.replace("%device%", device)
+        template = template.replace("%device%", device)
 
     device = os.path.basename(device)
 
