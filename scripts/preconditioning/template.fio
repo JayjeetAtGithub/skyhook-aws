@@ -1,6 +1,6 @@
 [global]
 name=preconditioning
-filename=/dev/nvme1n1
+filename=%device%
 ioengine=libaio
 direct=1
 bs=4k
