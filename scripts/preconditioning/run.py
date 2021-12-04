@@ -1,30 +1,29 @@
 import os
-import sys
-import subprocess
 
 def run_raw_command(command, env=None):
-    result = subprocess.run(
-        command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
-    )
-    if result.returncode > 0 or (len(str(result.stderr)) > 3):
-        stdout = result.stdout.decode("UTF-8").strip()
-        stderr = result.stderr.decode("UTF-8").strip()
-        print(f"\nAn error occurred: {stderr} - {stdout}")
-        sys.exit(1)
-
-    return result
+    return os.system(" ".join(command))
 
 if __name__ == "__main__":
-    device = sys.argv[1]
-    with open('template.fio', 'r') as f:
-        template = f.read()
-        template = template.replace("%device%", device)
+    devices = [
+        "/dev/nvme1n1", 
+        "/dev/nvme2n1", 
+        "/dev/nvme3n1", 
+        "/dev/nvme4n1", 
+        "/dev/nvme5n1", 
+        "/dev/nvme6n1", 
+        "/dev/nvme7n1", 
+        "/dev/nvme8n1"
+    ]
 
-    device = os.path.basename(device)
+    for device in devices:
+        with open('template.fio', 'r') as f:
+            template = f.read()
+            template = template.replace("%device%", device)
 
-    with open('job_{}.fio'.format(device), 'w') as f:
-        f.write(template)
+        device = os.path.basename(device)
 
-    cmd = ['fio', 'job_{}.fio'.format(device), '--output-format=json', '--output=job_{}.json'.format(device)]
-    result = run_raw_command(cmd)
-    print(result)
+        with open('job_{}.fio'.format(device), 'w') as f:
+            f.write(template)
+
+        cmd = ['sudo', 'fio', 'job_{}.fio'.format(device), '--output-format=json', '--output=job_{}.json'.format(device)]
+        run_raw_command(cmd)

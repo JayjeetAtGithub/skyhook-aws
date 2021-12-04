@@ -49,6 +49,7 @@ prepare_ec2_instances() {
     echo "[+] Preparing ec2 instances"
     ip=($(cat public_ips.txt))
     client=${ip[0]}
+    server=${ip[1]}
 
     setup_passwordless_ssh $client
     for host in "${ip[@]}"
@@ -73,8 +74,12 @@ prepare_ec2_instances() {
     do_scp deploy_skyhook.sh $client /home/ubuntu 
     do_scp deploy_data.sh $client /home/ubuntu
     do_scp bench.sh $client /home/ubuntu 
+    
     do_scp preconditioning/run.py $client /home/ubuntu
     do_scp preconditioning/template.fio $client /home/ubuntu
+
+    do_scp preconditioning/run.py $server /home/ubuntu
+    do_scp preconditioning/template.fio $server /home/ubuntu
 
     printf "\n\n\n"
     echo "ssh -i '$key_name.pem' ubuntu@${ip[0]}"
