@@ -22,6 +22,8 @@ spawn_ec2_instances() {
     sleep 60
 
     echo "[+] Gathering Public and Private IPs "
+    echo " " > public_ips.txt
+    echo " " > private_ips.txt
     aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp" > public_ips.txt
     aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
 }
@@ -58,6 +60,8 @@ prepare_ec2_instances() {
     do_ssh $client "rm -rf *.txt"
     do_ssh $client "rm -rf *.sh"
     do_ssh $client "rm -rf *.cc"
+    do_ssh $client "sudo apt-get update"
+    do_ssh $client "sudo apt-get install -y python3 python3-pip fio"
 
     echo "[+] Copying public and private IPs to client instance"
     do_scp public_ips.txt $client /home/ubuntu 
@@ -69,6 +73,8 @@ prepare_ec2_instances() {
     do_scp deploy_skyhook.sh $client /home/ubuntu 
     do_scp deploy_data.sh $client /home/ubuntu
     do_scp bench.sh $client /home/ubuntu 
+    do_scp preconditioning/run.py $client /home/ubuntu
+    do_scp preconditioning/template.fio $client /home/ubuntu
 
     printf "\n\n\n"
     echo "ssh -i '$key_name.pem' ubuntu@${ip[0]}"
