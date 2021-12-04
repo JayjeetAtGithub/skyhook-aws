@@ -61,8 +61,10 @@ prepare_ec2_instances() {
     do_ssh $client "rm -rf *.txt"
     do_ssh $client "rm -rf *.sh"
     do_ssh $client "rm -rf *.cc"
-    do_ssh $client "sudo apt-get update"
-    do_ssh $client "sudo apt-get install -y python3 python3-pip fio"
+    
+    echo "[+] Installing dependencies"
+    do_ssh $server "sudo apt-get update"
+    do_ssh $server "sudo apt-get install -y python3 python3-pip fio"
 
     echo "[+] Copying public and private IPs to client instance"
     do_scp public_ips.txt $client /home/ubuntu 
@@ -75,14 +77,13 @@ prepare_ec2_instances() {
     do_scp deploy_data.sh $client /home/ubuntu
     do_scp bench.sh $client /home/ubuntu 
     
-    do_scp preconditioning/run.py $client /home/ubuntu
-    do_scp preconditioning/template.fio $client /home/ubuntu
-
+    echo "[+] Copying scripts to the server instance"
     do_scp preconditioning/run.py $server /home/ubuntu
     do_scp preconditioning/template.fio $server /home/ubuntu
 
     printf "\n\n\n"
-    echo "ssh -i '$key_name.pem' ubuntu@${ip[0]}"
+    echo "ssh -i '$key_name.pem' ubuntu@${client}"
+    echo "ssh -i '$key_name.pem' ubuntu@${server}"
 }
 
 case "$1" in
