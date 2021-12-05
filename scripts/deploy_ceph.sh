@@ -19,9 +19,9 @@
 set -eu
 
 if [[ $# -lt 6 ]] ; then
-    echo "usage: ./deploy_ceph.sh [mon hosts] [osd hosts] [mds hosts] [mgr hosts] [blkdevice] [pool size]"
+    echo "usage: ./deploy_ceph.sh [mon hosts] [osd hosts] [mds hosts] [mgr hosts] [blkdevice] [pool size] [pg_count] [num osds]"
     echo " "
-    echo "for example: ./deploy_ceph.sh node1,node2,node3 node4,node5,node6 node1 node1 /dev/sdb 3"
+    echo "for example: ./deploy_ceph.sh node1,node2,node3 node4,node5,node6 node1 node1 /dev/sdb,/dev/sdc 3 256 8"
     exit 1
 fi
 
@@ -30,8 +30,11 @@ MON=${1:-node1}
 OSD=${2:-node1}
 MDS=${3:-node1}
 MGR=${4:-node1}
-BLKDEV=${5:-/dev/nvme0n1p4}
+BLKDEV=${5:-/dev/nvme1n1,/dev/nvme2n1,/dev/nvme3n1,/dev/nvme4n1,/dev/nvme5n1,/dev/nvme6n1}
+IFS=',' read -ra BLKDEVS <<< "$BLKDEV"
 POOL_SIZE=${6:-1}
+PG_COUNT=${7:-256}
+NUM_OSDS=${8:-1}
 
 # split the comma separated nodes into a list
 IFS=',' read -ra MON_LIST <<< "$MON"; unset IFS
@@ -72,12 +75,13 @@ function delete_osds {
     for node in ${OSD_LIST}; do
         ssh $node sudo pkill ceph-osd || true
         # try to zap the block devices.
-        ssh $node sudo ceph-volume lvm zap $BLKDEV --destroy || true
+        for blkdev in "${BLKDEVS[@]}"; do
+            ssh $node sudo ceph-volume lvm zap $blkdev --destroy || true
+        done
         ssh $node sudo rm -rf /etc/ceph/*
     done
 
     # remove all the OSDs
-    NUM_OSDS=${#OSD_LIST[@]}
     for ((i=0; i<$NUM_OSDS; i++)); do 
         # mark an OSD down and remove it
         ceph osd down osd.${i} || true
@@ -175,15 +179,18 @@ for node in ${OSD_LIST}; do
 
     scp /tmp/deployment/ceph.bootstrap-osd.keyring $node:/tmp/ceph-osd.keyring
     ssh $node sudo cp /tmp/ceph-osd.keyring /var/lib/ceph/bootstrap-osd/ceph.keyring
-    ceph-deploy osd create --data $BLKDEV $node
+
+    for blkdev in "${BLKDEVS[@]}"; do
+        ceph-deploy osd create --data $blkdev $node
+    done
 done
 
 echo "[8] deploying MDSs"
 ceph-deploy mds create $MDS_LIST
 
 echo "[9] creating pools for deploying CephFS"
-ceph osd pool create cephfs_data 128
-ceph osd pool create cephfs_metadata 16
+ceph osd pool create cephfs_data     32 
+ceph osd pool create cephfs_metadata 32
 
 # turn off pg autoscale
 ceph osd pool set cephfs_data pg_autoscale_mode off
@@ -192,6 +199,9 @@ ceph osd pool set cephfs_data pg_autoscale_mode off
 ceph osd pool set cephfs_data size $POOL_SIZE
 ceph osd pool set cephfs_metadata size $POOL_SIZE
 ceph osd pool set device_health_metrics size $POOL_SIZE || true
+
+# set the pool pg num
+ceph osd pool set cephfs_data pg_num $PG_NUM
 
 echo "[9] deploying CephFS"
 ceph fs new cephfs cephfs_metadata cephfs_data
