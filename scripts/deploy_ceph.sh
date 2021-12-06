@@ -201,7 +201,7 @@ ceph osd pool set cephfs_metadata size $POOL_SIZE
 ceph osd pool set device_health_metrics size $POOL_SIZE || true
 
 # set the pool pg num
-ceph osd pool set cephfs_data pg_num $PG_NUM
+ceph osd pool set cephfs_data pg_num $PG_COUNT
 
 echo "[9] deploying CephFS"
 ceph fs new cephfs cephfs_metadata cephfs_data
