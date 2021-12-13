@@ -12,3 +12,7 @@ screen -dmSL workstuff python3 run.py
 ```
 cat screenlog.0
 ```
+
+4. 
+
+dcfldd if=/dev/zero of=/dev/nvme1n1 of=/dev/nvme2n1 of=/dev/nvme3n1 of=/dev/nvme4n1 of=/dev/nvme5n1 of=/dev/nvme6n1 of=/dev/nvme7n1 of=/dev/nvme8n1 

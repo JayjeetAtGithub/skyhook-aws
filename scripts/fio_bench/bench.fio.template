@@ -1,0 +1,13 @@
+[global]
+thread
+ioengine=libaio
+direct=1
+buffered=0
+log_avg_msec=1000
+group_reporting=1
+rw=%workload%
+bs=8m
+iodepth=100
+numjobs=1
+runtime=10
+time_based
