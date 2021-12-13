@@ -9,8 +9,11 @@ rw=read
 bs=8m
 iodepth=100
 numjobs=1
-runtime=10
+runtime=20
 time_based
+write_bw_log=read.results
+write_iops_log=read.results
+write_lat_log=read.results
 
 
 [nvme1n1]

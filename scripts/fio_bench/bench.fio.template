@@ -9,5 +9,8 @@ rw=%workload%
 bs=8m
 iodepth=100
 numjobs=1
-runtime=10
+runtime=20
 time_based
+write_bw_log=%workload%.results
+write_iops_log=%workload%.results
+write_lat_log=%workload%.results

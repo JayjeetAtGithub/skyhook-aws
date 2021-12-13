@@ -31,4 +31,8 @@ filename={}
         os.system(f"ssh -i '{key}' ubuntu@{client} mkdir -p fio_bench/fio_job_files")
         os.system(f"ssh -i '{key}' ubuntu@{client} mkdir -p fio_bench/fio_result")
         os.system(f"scp -i '{key}' {workload}.fio ubuntu@{client}:/home/ubuntu/fio_bench/fio_job_files")
-        os.system(f"ssh -i '{key}' ubuntu@{client} sudo fio fio_bench/fio_job_files/{workload}.fio --output fio_bench/fio_result/{workload}.fio.out")
+        os.system(f"ssh -i '{key}' ubuntu@{client} sudo fio fio_bench/fio_job_files/{workload}.fio")
+
+    for workload in workloads:
+        for i in range(2, 9):
+            os.system(f"ssh -i '{key}' ubuntu@{client} rm -rf {workload}.results_*.{i}.log")
