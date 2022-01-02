@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-count=2
+count=8
 ami=ami-0a49b025fffbbdac6
 instance_type=i3.metal
 security_group_ids=sg-0f8c8cb3d7124e05c

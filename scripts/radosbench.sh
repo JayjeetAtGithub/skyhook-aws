@@ -10,7 +10,7 @@ do_ssh() {
     ssh -i 'jayjeet2-frankfurt.pem' ubuntu@$1 $2
 }
 
-blocksizes=( 4M 8M 16M 32M 64M )
+blocksizes=( 8M )
 
 for blksize in "${blocksizes[@]}"
 do
@@ -23,7 +23,7 @@ ed ${BASE_DIR}/write.json <<< $'1d\nw\nq'
 do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data 180 seq --no-cleanup --format=json-pretty" > ${BASE_DIR}/seq.json
 ed ${BASE_DIR}/seq.json <<< $'1d\nw\nq'
 
-do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data 180 rand --no-cleanup --format=json-pretty" > ${BASE_DIR}/rand.json
-ed ${BASE_DIR}/rand.json <<< $'1d\nw\nq'
+# do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data 180 rand --no-cleanup --format=json-pretty" > ${BASE_DIR}/rand.json
+# ed ${BASE_DIR}/rand.json <<< $'1d\nw\nq'
 
 done

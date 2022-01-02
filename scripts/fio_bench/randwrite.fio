@@ -9,7 +9,7 @@ rw=randwrite
 bs=8m
 iodepth=100
 numjobs=1
-runtime=20
+runtime=180
 time_based
 write_bw_log=randwrite.results
 write_iops_log=randwrite.results
