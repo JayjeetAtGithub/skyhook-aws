@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-count=8
+count=3
 ami=ami-0a49b025fffbbdac6
 instance_type=i3.metal
 security_group_ids=sg-0f8c8cb3d7124e05c
@@ -24,8 +24,8 @@ spawn_ec2_instances() {
     echo "[+] Gathering Public and Private IPs "
     echo " " > public_ips.txt
     echo " " > private_ips.txt
-    aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp" > public_ips.txt
-    aws ec2 describe-instances --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
+    aws ec2 describe-instances --filters Name=key-name,Values=$key_name --output text --query "Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp" > public_ips.txt
+    aws ec2 describe-instances --filters Name=key-name,Values=$key_name --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
 }
 
 do_ssh() {
@@ -46,6 +46,9 @@ authorize_keys() {
 }
 
 prepare_ec2_instances() {
+    aws ec2 describe-instances --filters Name=key-name,Values=$key_name --output text --query "Reservations[].Instances[].NetworkInterfaces[].Association.PublicIp" > public_ips.txt
+    aws ec2 describe-instances --filters Name=key-name,Values=$key_name --output text --query "Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddress" > private_ips.txt
+    
     echo "[+] Preparing ec2 instances"
     ip=($(cat public_ips.txt))
     client=${ip[0]}
@@ -83,7 +86,6 @@ prepare_ec2_instances() {
 
     printf "\n\n\n"
     echo "ssh -i '$key_name.pem' ubuntu@${client}"
-    echo "ssh -i '$key_name.pem' ubuntu@${server}"
 }
 
 case "$1" in
