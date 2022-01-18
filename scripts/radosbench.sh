@@ -18,7 +18,7 @@ do
 
 BASE_DIR=results/${2}/${1}/${blksize}
 mkdir -p ${BASE_DIR}
-do_ssh ${3} "rados bench --no-hints -b ${blksize} -t ${4} -p cephfs_data ${5} write --no-cleanup --format=json-pretty" > ${BASE_DIR}/write.json
+do_ssh ${3} "rados bench --no-hints -b ${blksize} -t 72 -p cephfs_data ${5} write --no-cleanup --format=json-pretty" > ${BASE_DIR}/write.json
 ed ${BASE_DIR}/write.json <<< $'1d\nw\nq'
 
 do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data ${5} seq --no-cleanup --format=json-pretty" > ${BASE_DIR}/seq.json
