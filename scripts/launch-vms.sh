@@ -3,7 +3,7 @@ set -e
 
 count=3
 ami=ami-0a49b025fffbbdac6
-instance_type=i3.metal
+instance_type=i3.16xlarge
 security_group_ids=sg-0f8c8cb3d7124e05c
 subnet_id=subnet-68491802
 key_name=jayjeet2-frankfurt
@@ -52,7 +52,7 @@ prepare_ec2_instances() {
     echo "[+] Preparing ec2 instances"
     ip=($(cat public_ips.txt))
     client=${ip[0]}
-    server=${ip[1]}
+    server=${ip[2]}
 
     setup_passwordless_ssh $client
     for host in "${ip[@]}"
