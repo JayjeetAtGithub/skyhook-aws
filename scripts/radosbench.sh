@@ -21,10 +21,16 @@ mkdir -p ${BASE_DIR}
 do_ssh ${3} "rados bench --no-hints -b ${blksize} -t 72 -p cephfs_data ${5} write --no-cleanup --format=json-pretty" > ${BASE_DIR}/write.json
 ed ${BASE_DIR}/write.json <<< $'1d\nw\nq'
 
-do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data ${5} seq --no-cleanup --format=json-pretty" > ${BASE_DIR}/seq.json
+do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data 120 seq --no-cleanup --format=json-pretty" > ${BASE_DIR}/seq.json
 ed ${BASE_DIR}/seq.json <<< $'1d\nw\nq'
 
-do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data ${5} rand --no-cleanup --format=json-pretty" > ${BASE_DIR}/rand.json
+do_ssh ${3} "rados bench --no-hints -t ${4} -p cephfs_data 120 rand --format=json-pretty" > ${BASE_DIR}/rand.json
 ed ${BASE_DIR}/rand.json <<< $'1d\nw\nq'
 
-done
+done 
+
+# 60, 4
+# 120, 8
+# 240, 16
+# 480, 32
+# 960, 64

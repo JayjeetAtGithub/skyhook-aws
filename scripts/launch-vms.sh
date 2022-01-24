@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-count=3
+count=12
 ami=ami-0a49b025fffbbdac6
 instance_type=i3.16xlarge
 security_group_ids=sg-0f8c8cb3d7124e05c
