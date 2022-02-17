@@ -25,7 +25,7 @@ if [[ $# -lt 1 ]] ; then
 fi
 
 NODES=$1
-BRANCH=${2:-master}
+BRANCH=${2:-arrow-master}
 DEPLOY_CLS_LIBS=${3:-false}
 BUILD_PYTHON_BINDINGS=${4:-false}
 BUILD_JAVA_BINDINGS=${5:-false}
@@ -37,6 +37,7 @@ sudo apt update
 sudo apt install -y python3 \
                python3-pip \
                python3-venv \
+               pkg-config \
                python3-numpy \
                cmake \
                libradospp-dev \
@@ -46,7 +47,7 @@ sudo apt install -y python3 \
                maven
 
 if [ ! -d "/tmp/arrow" ]; then
-  git clone https://github.com/apache/arrow /tmp/arrow
+  git clone https://github.com/uccross/arrow /tmp/arrow
   cd /tmp/arrow
   git submodule update --init --recursive
 fi
@@ -81,13 +82,13 @@ if [[ "${BUILD_PYTHON_BINDINGS}" == "true" ]]; then
   export ARROW_HOME=$WORKDIR/dist
   export PYARROW_WITH_DATASET=1
   export PYARROW_WITH_PARQUET=1
-  export PYARROW_WITH_RADOS=1
+  export PYARROW_WITH_SKYHOOK=1
 
-  sudo mkdir -p /root/dist/lib
-  sudo mkdir -p /root/dist/include
+  sudo mkdir -p $HOME/dist/lib
+  sudo mkdir -p $HOME/dist/include
 
-  sudo cp -r /usr/local/lib/. /root/dist/lib
-  sudo cp -r /usr/local/include/. /root/dist/include
+  sudo cp -r /usr/local/lib/. $HOME/dist/lib
+  sudo cp -r /usr/local/include/. $HOME/dist/include
 
   cd /tmp/arrow/python
   pip3 install -r requirements-build.txt -r requirements-test.txt
